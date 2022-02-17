@@ -3,6 +3,9 @@
 namespace Drupal\culturefeed_agenda\Plugin\Block;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\culturefeed_search\SearchPageServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -25,7 +28,7 @@ class AgendaSearchPagerBlock extends AgendaSearchPageBlockBase {
    *
    * @var \Drupal\Core\Pager\PagerManagerInterface
    */
-  protected $pagerManager;
+  protected PagerManagerInterface $pagerManager;
 
   /**
    * {@inheritdoc}
@@ -35,8 +38,35 @@ class AgendaSearchPagerBlock extends AgendaSearchPageBlockBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('culturefeed_agenda.search_page_service'),
+      $container->get('form_builder'),
       $container->get('pager.manager')
     );
+  }
+
+  /**
+   * AgendaSearchPagerBlock constructor.
+   *
+   * @param array $configuration
+   *   The plugin configuration, i.e. an array with configuration values keyed
+   *   by configuration option name. The special key 'context' may be used to
+   *   initialize the defined contexts by setting it to an array of context
+   *   values keyed by context names.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\culturefeed_search\SearchPageServiceInterface $searchPageService
+   *   The search page service.
+   * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
+   *   The form builder.
+   * @param \Drupal\Core\Pager\PagerManagerInterface $pager_manager
+   *   The pager manager.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, SearchPageServiceInterface $searchPageService, FormBuilderInterface $formBuilder, PagerManagerInterface $pager_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $searchPageService, $formBuilder);
+
+    $this->pagerManager = $pager_manager;
   }
 
   /**
@@ -58,7 +88,7 @@ class AgendaSearchPagerBlock extends AgendaSearchPageBlockBase {
   /**
    * {@inheritdoc}
    */
-  public function getCacheContexts() {
+  public function getCacheContexts(): array {
     return Cache::mergeContexts(parent::getCacheContexts(), ['url']);
   }
 
