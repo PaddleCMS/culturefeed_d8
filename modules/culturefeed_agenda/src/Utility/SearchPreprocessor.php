@@ -10,7 +10,9 @@ use CultuurNet\CalendarSummaryV3\Offer\OfferType;
 use CultuurNet\CalendarSummaryV3\Offer\Status;
 use CultuurNet\SearchV3\ValueObjects\Event;
 use CultuurNet\SearchV3\ValueObjects\Place;
+use CultuurNet\SearchV3\ValueObjects\TranslatedString;
 use DateTimeImmutable;
+use Drupal;
 use IntlDateFormatter;
 use Purl\Url;
 
@@ -472,7 +474,19 @@ class SearchPreprocessor {
       $available = $current_date_time >= $event->getBookingInfo()->getAvailabilityStarts() && $event->getBookingInfo()->getAvailabilityEnds() >= $current_date_time;
     }
 
-    return new Offer(OfferType::event(), Status::fromArray(['type' => $event->getStatus()->getType(), 'reason' => $event->getStatus()->getReason()]), BookingAvailability::fromArray(['type' => $available ? 'Available' : 'Unavailable']), DateTimeImmutable::createFromMutable($event->getStartDate()), DateTimeImmutable::createFromMutable($event->getEndDate()), $calendar_type);
+    $start_date = !empty($event->getStartDate()) ? DateTimeImmutable::createFromMutable($event->getStartDate()) : NULL;
+    $end_date = !empty($event->getEndDate()) ? DateTimeImmutable::createFromMutable($event->getEndDate()) : $start_date;
+
+    return new Offer(
+      OfferType::event(),
+      Status::fromArray([
+        'type' => $event->getStatus()->getType(),
+        'reason' => $event->getStatus()->getReason() ? $event->getStatus()->getReason()->getValues() : [],
+      ]),
+      BookingAvailability::fromArray(['type' => $available ? 'Available' : 'Unavailable']),
+      $start_date,
+      $end_date,
+      $calendar_type);
   }
 
 }
