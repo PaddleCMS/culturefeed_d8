@@ -3,8 +3,14 @@
 namespace Drupal\culturefeed_agenda\Utility;
 
 use CultuurNet\CalendarSummaryV3\CalendarHTMLFormatter;
+use CultuurNet\CalendarSummaryV3\Offer\BookingAvailability;
+use CultuurNet\CalendarSummaryV3\Offer\CalendarType;
+use CultuurNet\CalendarSummaryV3\Offer\Offer;
+use CultuurNet\CalendarSummaryV3\Offer\OfferType;
+use CultuurNet\CalendarSummaryV3\Offer\Status;
 use CultuurNet\SearchV3\ValueObjects\Event;
 use CultuurNet\SearchV3\ValueObjects\Place;
+use DateTimeImmutable;
 use IntlDateFormatter;
 use Purl\Url;
 
@@ -35,7 +41,7 @@ class SearchPreprocessor {
       'where' => $event->getLocation() ? $this->preprocessPlace($event->getLocation(), $langcode) : NULL,
       'when_summary' => $this->formatEventDatesSummary($event, $langcode),
       'organizer' => ($event->getOrganizer() && $event->getOrganizer()
-        ->getName()) ? $event->getOrganizer()
+          ->getName()) ? $event->getOrganizer()
         ->getName()
         ->getValueForLanguage($langcode) : NULL,
       'age_range' => $event->getTypicalAgeRange() ? $this->formatAgeRange($event->getTypicalAgeRange(), $langcode) : NULL,
@@ -314,7 +320,7 @@ class SearchPreprocessor {
 
     $formatter = new CalendarHTMLFormatter($locale);
 
-    return $formatter->format($event, 'md');
+    return $formatter->format($this->convertSearchEventToCalendarSummaryOffer($event), 'md');
   }
 
   /**
@@ -340,7 +346,7 @@ class SearchPreprocessor {
 
     $formatter = new CalendarHTMLFormatter($locale);
 
-    return $formatter->format($event, 'lg');
+    return $formatter->format($this->convertSearchEventToCalendarSummaryOffer($event), 'lg');
   }
 
   /**
@@ -368,12 +374,13 @@ class SearchPreprocessor {
   }
 
   /**
-   * Check if event is considered a "Vlieg" event and return either
-   * the minimum age or a boolean value.
+   * Checks if the event is considered a "Vlieg" event.
    *
    * @param \CultuurNet\SearchV3\ValueObjects\Event $event
+   *   The event.
    *
    * @return bool|string
+   *   Whether the event is a "Vlieg" event or not, or the minimum age.
    */
   public static function isVliegEvent(Event $event) {
     $range = $event->getTypicalAgeRange();
@@ -401,11 +408,13 @@ class SearchPreprocessor {
   }
 
   /**
-   * Check if event is considered an "Uitpas" event.
+   * Checks if the event is considered an "Uitpas" event.
    *
    * @param \CultuurNet\SearchV3\ValueObjects\Event $event
+   *   The event.
    *
    * @return bool
+   *   Whether the event is an "Uitpas" event.
    */
   public static function isUitpasEvent(Event $event) {
     $labels = $event->getLabels();
@@ -421,6 +430,49 @@ class SearchPreprocessor {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Converts an event from an offer object.
+   *
+   * The CalendarHTMLFormatter from the CalendarSummaryV3 library expects an
+   * object of the Offer class, the Event class from the Search V3 is not
+   * compatible with that class so a conversion is required.
+   *
+   * @param \CultuurNet\SearchV3\ValueObjects\Event $event
+   *   The SearchV3 event.
+   *
+   * @return \CultuurNet\CalendarSummaryV3\Offer\Offer
+   *   The CalendarSummary V3 offer.
+   */
+  public function convertSearchEventToCalendarSummaryOffer(Event $event): Offer {
+    switch ($event->getCalendarType()) {
+      case 'multiple':
+        $calendar_type = CalendarType::multiple();
+        break;
+
+      case 'periodic':
+        $calendar_type = CalendarType::periodic();
+        break;
+
+      case 'permanent':
+        $calendar_type = CalendarType::permanent();
+        break;
+
+      case 'single':
+      default:
+        $calendar_type = CalendarType::single();
+        break;
+    }
+
+    $current_date_time = new \DateTime();
+    $available = FALSE;
+
+    if (!empty($event->getBookingInfo())) {
+      $available = $current_date_time >= $event->getBookingInfo()->getAvailabilityStarts() && $event->getBookingInfo()->getAvailabilityEnds() >= $current_date_time;
+    }
+
+    return new Offer(OfferType::event(), Status::fromArray(['type' => $event->getStatus()->getType(), 'reason' => $event->getStatus()->getReason()]), BookingAvailability::fromArray(['type' => $available ? 'Available' : 'Unavailable']), DateTimeImmutable::createFromMutable($event->getStartDate()), DateTimeImmutable::createFromMutable($event->getEndDate()), $calendar_type);
   }
 
 }
