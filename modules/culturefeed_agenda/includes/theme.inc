@@ -37,7 +37,7 @@ function template_preprocess_culturefeed_event(array &$variables) {
     'image' => [
       'width' => 360,
       'height' => 360,
-      'default_image' => file_create_url(Drupal::service('module_handler')->getModule('culturefeed_agenda')->getPath() . '/img/no-thumbnail.gif'),
+      'default_image' => \Drupal::service('file_url_generator')->generateAbsoluteString(Drupal::service('module_handler')->getModule('culturefeed_agenda')->getPath() . '/img/no-thumbnail.gif'),
       'fit' => 'fill',
     ],
     'description' => [

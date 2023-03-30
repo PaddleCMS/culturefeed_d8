@@ -3,5 +3,5 @@ google-maps:
     js/google-maps.js: { }
   dependencies:
     - core/jquery
-    - core/jquery.once
+    - core/once
     - core/drupal
