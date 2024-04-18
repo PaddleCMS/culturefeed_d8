@@ -5,3 +5,4 @@ hidden-value-autocomplete:
     - core/jquery
     - core/drupal
     - core/drupal.autocomplete
+    - core/once

@@ -3,7 +3,7 @@
  * Provides hidden value autocompletion.
  */
 
-(function ($, Drupal) {
+(function ($, Drupal, once) {
   Drupal.hiddenValueAutocomplete = {};
 
   /**
@@ -11,7 +11,7 @@
    */
   Drupal.behaviors.hiddenValueAutocomplete = {
     attach: function attach(context) {
-      var $autocomplete = $(context).find('.hidden-value-autocomplete').once('hidden-value-autocomplete');
+      var $autocomplete = $(once('hidden-value-autocomplete', context)).find('.hidden-value-autocomplete');
       if ($autocomplete.length) {
         // Select handler.
         $autocomplete.autocomplete('option', 'select', Drupal.hiddenValueAutocomplete.autocompleteSelectHandler);
@@ -94,4 +94,4 @@
     }
   };
 
-})(jQuery, Drupal);
+})(jQuery, Drupal, once);
