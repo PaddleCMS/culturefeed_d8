@@ -7,6 +7,7 @@ use CultuurNet\SearchV3\Parameter\Query;
 use CultuurNet\SearchV3\SearchQuery;
 use Drupal\Core\Link;
 use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\Core\Security\Attribute\TrustedCallback;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\culturefeed_search_api\DrupalCulturefeedSearchClientInterface;
@@ -79,6 +80,7 @@ class CulturefeedContentFieldLazyBuilder {
    * @return array
    *   Render array.
    */
+  #[TrustedCallback]
   public function buildCulturefeedContent(string $title = '', string $query = '', string $viewMode = '', int $limit = 10, string $sort = NULL, string $sortDirection = 'desc', bool $defaultMoreLink = TRUE, string $moreLink = '', bool $showPager = FALSE) {
     if (!empty($query)) {
       $query = str_replace(',', ' AND ', '(' . rtrim($query . ')', ','));

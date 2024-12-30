@@ -3,7 +3,7 @@
 namespace Drupal\culturefeed_search_api\Element;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\Render\Element\Textfield;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\Core\Render\Element\Textfield;
  *
  * @FormElement("culturefeed_hidden_value_autocomplete")
  */
-class HiddenValueAutocomplete extends FormElement {
+class HiddenValueAutocomplete extends FormElementBase {
 
   /**
    * {@inheritdoc}

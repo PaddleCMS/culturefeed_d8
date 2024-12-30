@@ -5,6 +5,7 @@ namespace Drupal\culturefeed_search\Controller;
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Utility\Error;
 use Drupal\culturefeed_search_api\DrupalCulturefeedSearchClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -79,7 +80,7 @@ class RegionsAutocompleteController extends ControllerBase {
         }
       }
       catch (\Exception $e) {
-        watchdog_exception('culturefeed_search_api', $e);
+        Error::logException($this->getLogger('culturefeed_search'), $e);
         $cache['#cache']['max-age'] = 0;
       }
     }

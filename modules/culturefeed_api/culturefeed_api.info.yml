@@ -1,5 +1,5 @@
 name: CultureFeed API
 description: 'Provides a client to connect with the CultureFeed API.'
 type: module
-core_version_requirement: ^9.3 || ^10
+core_version_requirement: ^10.3 || ^11
 package: 'CultureFeed'

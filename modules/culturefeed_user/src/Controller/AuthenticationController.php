@@ -5,6 +5,7 @@ namespace Drupal\culturefeed_user\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Utility\Error;
 use Drupal\culturefeed_api\DrupalCultureFeedClient;
 use Drupal\culturefeed_user\CultureFeedCurrentUserInterface;
 use Drupal\culturefeed_api\CultureFeedUserContextManagerInterface;
@@ -118,7 +119,7 @@ class AuthenticationController extends ControllerBase {
     }
     catch (\Exception $e) {
       $this->messenger()->addError($this->t('An error occurred while logging in. Please try again later.'));
-      watchdog_exception('culturefeed', $e);
+      Error::logException($this->getLogger('culturefeed'), $e);
       return new RedirectResponse($this->getUrlGenerator()->generateFromRoute('<front>'), 302);
     }
     if (!$token) {
@@ -159,12 +160,11 @@ class AuthenticationController extends ControllerBase {
         unset($_SESSION['oauth_token_secret']);
 
         $this->cultureFeedClient->updateClient($token['oauth_token'], $token['oauth_token_secret']);
-        /** @var \CultureFeed_User $account */
         $account = $this->cultureFeedClient->getUser($token['userId']);
       }
       catch (\Exception $e) {
         $this->messenger()->addError($this->t('An error occurred while logging in. Please try again later.'));
-        watchdog_exception('culturefeed', $e);
+        Error::logException($this->getLogger('culturefeed'), $e);
         return new RedirectResponse($this->getUrlGenerator()->generateFromRoute('<front>'), 302);
       }
 

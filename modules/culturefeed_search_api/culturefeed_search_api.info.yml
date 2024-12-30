@@ -1,7 +1,7 @@
 name: Culturefeed search API
 description: 'Provides a client to connect with the search API.'
 type: module
-core_version_requirement: ^9.3 || ^10
+core_version_requirement: ^10.3 || ^11
 package: 'CultureFeed'
 
 configure: culturefeed_search_api.settings
